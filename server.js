@@ -48,19 +48,24 @@ app.get("/search", async (req, res) => {
     const q = req.query.q || "";
     const token = await fetchAccessToken();
 
-    const url = `https://platform.fatsecret.com/rest/foods/search/v3?search_expression=${encodeURIComponent(q)}&max_results=10&page_number=0&format=json`;
+    // Use the Basic API instead of Premier
+    const url = `https://platform.fatsecret.com/rest/server.api` +
+      `?method=foods.search.v2&search_expression=${encodeURIComponent(q)}` +
+      `&format=json&max_results=5&page_number=0`;
+
     const proxied = await fetch(url, {
-      headers: { "Authorization": `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` }
     });
 
-    const json = await proxied.text();
+    const data = await proxied.text();
     res.setHeader("Content-Type", "application/json");
-    res.status(proxied.status).send(json);
+    res.status(proxied.status).send(data);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
 app.listen(PORT, () => {
   console.log(`Proxy listening on port ${PORT}`);
